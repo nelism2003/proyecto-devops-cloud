@@ -1,0 +1,38 @@
+name: Pipeline CI DevOps
+
+# El pipeline se ejecutará automáticamente cada vez que hagas un "git push" a la rama main
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Clonar el código del repositorio en el servidor de GitHub
+    - name: Clonar el repositorio
+      uses: actions/checkout@v4
+
+    # 2. Configurar el entorno de Python para pruebas
+    - name: Configurar Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    # 3. Instalar las dependencias de la app
+    - name: Instalar dependencias
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    # 4. Simular pruebas básicas obligatorias (Pruebas de sintaxis)
+    - name: Ejecutar pruebas básicas
+      run: |
+        python -m compileall main.py
+
+    # 5. Verificar que Docker puede compilar la imagen correctamente en la nube
+    - name: Validar construcción de imagen Docker
+      run: |
+        docker build -t mi-app-devops:${{ github.sha }} .
+        
